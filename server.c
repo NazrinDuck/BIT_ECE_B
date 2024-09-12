@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SOCK_PORT 9988
 #define BUFFER_LENGTH 1024
 #define MAX_CONN_LIMIT 512
 
@@ -231,6 +230,13 @@ void *recv_message(void *arg) {
 }
 
 int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    fprintf(stderr, "usage: server port\n");
+    exit(1);
+  }
+
+  int port = atoi(argv[1]);
+
   struct sockaddr_in server_addr = {0};
   int readnum = 0;
   char buf[128] = {0};
@@ -248,7 +254,7 @@ int main(int argc, char *argv[]) {
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(SOCK_PORT);
+  server_addr.sin_port = htons(port);
   if (bind(sockfd_server, (struct sockaddr *)&server_addr,
            sizeof(server_addr)) == -1) {
     perror(ERROR "bind socket error!\n");

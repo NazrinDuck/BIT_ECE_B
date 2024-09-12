@@ -11,7 +11,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#define SOCK_PORT 9988
 #define BUFFER_LENGTH 1024
 
 #define RED "\x1b[01;31m"
@@ -239,17 +238,18 @@ int new_socket() {
 }
 
 int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    fprintf(stderr, "usage: client hostname port\n");
+    exit(1);
+  }
+
   char *ip = argv[1];
+  int port = atoi(argv[2]);
 
   char *msg_send = (char *)malloc(1000);
   char *msg_recv = (char *)malloc(1000);
 
   struct sockaddr_in client_addr = {0};
-
-  if (argc != 2) {
-    fprintf(stderr, "usage: client hostname\n");
-    exit(1);
-  }
 
   int sockfd = new_socket();
 
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 
   memset(&client_addr, 0, sizeof(client_addr));
   client_addr.sin_family = AF_INET;
-  client_addr.sin_port = htons(SOCK_PORT);
+  client_addr.sin_port = htons(port);
   client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   inet_pton(AF_INET, ip, &client_addr.sin_addr);
 
@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
     perror(ERROR "connecting server failed!\n");
     exit(1);
   }
-  printf(OK "successful to connect %s:%d\n", ip, SOCK_PORT);
+  printf(OK "successful to connect %s:%d\n", ip, port);
   exchange_name(sockfd);
   printf(OK "now you can input your message (no more than 1000 characters)\n");
   printf(OK "(input exit to quit, help for more infomation)\n");
